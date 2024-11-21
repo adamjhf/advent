@@ -35,18 +35,14 @@ let match_digit_at_pos s i =
       let digit_len = String.length key in
       match acc with
       | Some a -> Some a
-      | None when (i + digit_len) <= String.length s ->
-        if key == String.sub s i digit_len
-        then Some value
-        else acc
+      | None when (i + digit_len) <= String.length s && key = String.sub s i digit_len -> Some value
       | None -> acc)
     digit_map
     None
         
 let find_first_digit s =
-  let len = String.length s in
   let rec find_digit i =
-    if i >= len then raise (Failure ("Digit not found in " ^ s))
+    if i >= String.length s then raise (Failure ("Digit not found in " ^ s))
     else match match_digit_at_pos s i with
     | Some d -> d
     | None -> find_digit (i + 1)
@@ -56,8 +52,9 @@ let find_first_digit s =
 let find_last_digit s =
   let rec find_digit i =
     if i < 0 then raise (Failure ("Digit not found in " ^ s))
-    else if s.[i] >= '0' && s.[i] <= '9' then int_of_char s.[i] - int_of_char '0'
-    else find_digit (i - 1)
+    else match match_digit_at_pos s i with
+    | Some d -> d
+      | None -> find_digit (i -1)
   in
   find_digit (String.length s - 1)
 
