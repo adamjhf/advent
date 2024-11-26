@@ -8,8 +8,10 @@ let read_lines_to_list filename =
 let parse_line_to_sets line =
   try
     let i = String.index line ':' in
+    let game_num = String.sub line 5 (i -5) |> int_of_string in
     let sets_part = String.sub line (i + 1) (String.length line - i - 1) in
-    String.split_on_char ';' sets_part |> List.map String.trim
+    let sets = String.split_on_char ';' sets_part |> List.map String.trim in
+    (game_num, sets)
   with Not_found -> failwith "Incorrect line format"
 
 let parse_set set =
@@ -35,12 +37,12 @@ let is_set_possible set =
   List.map is_cube_possible set |> List.fold_left ( && ) true
 
 let is_game_possible game =
-  List.map is_set_possible game |> List.fold_left ( && ) true
+  List.map is_set_possible (snd game) |> List.fold_left ( && ) true
 
 let () =
   read_lines_to_list "day02/input.txt"
   |> List.map parse_line_to_sets
-  |> List.map (List.map parse_set)
+  |> List.map (fun (x, y) -> (x, List.map parse_set y))
   |> List.filter is_game_possible
-  |> List.length
+  |> List.fold_left (fun acc (x, _) -> acc + x) 0
   |> Printf.printf "%d\n"
