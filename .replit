@@ -1,6 +1,5 @@
-compile = ["dune", "build"]
-run = ["dune", "exec", "hello_world"]
-entrypoint = "bin/main.ml"
+run = "cd advent2023 && dune exec $(find . -type f -printf '%T+ %h\n' | sort -r | head -n1 | cut -d'/' -f2-)"
+entrypoint = "advent2023/day01/main.ml"
 hidden = ["_build", ".opam"]
 
 [env]
