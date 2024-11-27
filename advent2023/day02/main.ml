@@ -39,10 +39,28 @@ let is_set_possible set =
 let is_game_possible game =
   List.map is_set_possible (snd game) |> List.fold_left ( && ) true
 
-let () =
+(* let () =
   read_lines_to_list "day02/input.txt"
   |> List.map parse_line_to_sets
   |> List.map (fun (x, y) -> (x, List.map parse_set y))
   |> List.filter is_game_possible
   |> List.fold_left (fun acc (x, _) -> acc + x) 0
   |> Printf.printf "%d\n"
+*)
+
+let init_map = StringMap.empty
+|> StringMap.add "red" 0
+|> StringMap.add "green" 0
+|> StringMap.add "blue" 0
+
+let power game =
+  List.fold_left (fun acc set -> acc) init_map game
+  |> StringMap.fold (fun _ min acc -> min * acc) 1
+
+let () =
+  read_lines_to_list "day02/input.txt"
+  |> List.map parse_line_to_sets
+  |> List.map (fun (x, y) -> (x, List.map parse_set y))
+  |> List.map (fun (_, y) -> power y)
+  |> List.fold_left (+) 0
+  |> Printf.printf
