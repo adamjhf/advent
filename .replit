@@ -1,4 +1,4 @@
-run = "cd advent2023 && dune exec $(find . -type f -printf '%T+ %h\n' | sort -r | head -n1 | cut -d'/' -f2-)"
+run = "cd advent2023 && dune exec $(find . -type f -path './day*' -printf '%T+ %h\n' | sort -r | head -n1 | cut -d'/' -f2-)"
 entrypoint = "advent2023/day01/main.ml"
 hidden = ["_build", ".opam"]
 
