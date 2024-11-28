@@ -6,8 +6,7 @@ let read_lines_to_list filename =
 type part_number = { number : int; y : int; x_start : int; x_end : int }
 [@@deriving show]
 
-type symbol = { x : int; y : int } [@@deriving show]
-type parsed_line = part_number list * symbol list [@@deriving show]
+type position = { x : int; y : int } [@@deriving show]
 
 let digit_to_int c = int_of_string (String.make 1 c)
 
@@ -34,7 +33,30 @@ let line_to_part_numbers y line =
   in
   get_part_numbers 0 0 [] []
 
+let is_part_number symbols n =
+  let width = n.x_end - n.x_start + 2 in
+  let above = List.init width (fun x -> { x = x + n.x_start; y = n.y - 1 }) in
+  let below = List.init width (fun x -> { x = x + n.x_start; y = n.y + 1 }) in
+  let around =
+    ({ x = n.x_start - 1; y = n.y } :: { x = n.x_end + 1; y = n.y } :: above)
+    @ below
+  in
+  List.exists
+    (fun symbol ->
+      List.exists (fun pos -> symbol.x = pos.x && symbol.y = pos.y) around)
+    symbols
+
 let () =
   let lines = read_lines_to_list "day03/input.txt" in
-  let parsed = line_to_part_numbers 1 (List.nth lines 1) in
-  print_endline (show_parsed_line parsed)
+  let numbers, symbols =
+    List.mapi line_to_part_numbers lines
+    |> List.split
+    |> fun (x, y) -> (List.flatten x, List.flatten y)
+  in
+  List.filter (is_part_number symbols) numbers
+  |> List.map (fun part -> part.number)
+  |> List.map (fun l ->
+         Printf.printf "%d\n" l;
+         l)
+  |> List.fold_left ( + ) 0
+  |> Printf.printf "%d\n"
