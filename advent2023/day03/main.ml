@@ -24,19 +24,26 @@ let line_to_part_numbers y line =
     | '0' .. '9' as digit ->
         get_part_numbers (x + 1) ((10 * cur) + digit_to_int digit) parts syms
     | '.' when cur > 0 ->
-        get_part_numbers (x + 1) 0 (new_part cur x y :: parts) syms
+        get_part_numbers (x + 1) 0 (new_part cur (x - 1) y :: parts) syms
     | '.' -> get_part_numbers (x + 1) 0 parts syms
+    | exception _ when cur > 0 -> (new_part cur (x - 1) y :: parts, syms)
     | exception _ -> (parts, syms)
     | _ when cur > 0 ->
-        get_part_numbers (x + 1) 0 (new_part cur x y :: parts) ({ x; y } :: syms)
+        get_part_numbers (x + 1) 0
+          (new_part cur (x - 1) y :: parts)
+          ({ x; y } :: syms)
     | _ -> get_part_numbers (x + 1) 0 parts ({ x; y } :: syms)
   in
   get_part_numbers 0 0 [] []
 
 let is_part_number symbols n =
-  let width = n.x_end - n.x_start + 2 in
-  let above = List.init width (fun x -> { x = x + n.x_start; y = n.y - 1 }) in
-  let below = List.init width (fun x -> { x = x + n.x_start; y = n.y + 1 }) in
+  let width = n.x_end - n.x_start + 3 in
+  let above =
+    List.init width (fun x -> { x = x + n.x_start - 1; y = n.y - 1 })
+  in
+  let below =
+    List.init width (fun x -> { x = x + n.x_start - 1; y = n.y + 1 })
+  in
   let around =
     ({ x = n.x_start - 1; y = n.y } :: { x = n.x_end + 1; y = n.y } :: above)
     @ below
@@ -55,8 +62,5 @@ let () =
   in
   List.filter (is_part_number symbols) numbers
   |> List.map (fun part -> part.number)
-  |> List.map (fun l ->
-         Printf.printf "%d\n" l;
-         l)
   |> List.fold_left ( + ) 0
   |> Printf.printf "%d\n"
